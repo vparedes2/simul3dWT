@@ -62,8 +62,9 @@ button:focus-visible{outline:2px solid var(--water);outline-offset:2px}
 .sdata{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px;margin:0 0 10px}
 .sdata div{border:1px solid var(--line);border-radius:7px;padding:5px 8px;min-width:0}
 .sdata span{display:block;font-size:10.5px;color:var(--muted);letter-spacing:.03em}
-.sdata b{font:500 15px var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
-.sdata small{font:400 10.5px var(--f-mono);color:var(--muted);margin-left:3px}
+.sdata b{font:500 15px var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:inline-block;vertical-align:bottom}
+.sdata small{font:400 10.5px var(--f-mono);color:var(--muted);margin-left:3px;overflow-wrap:anywhere}
+.sdata .cr{color:var(--bad,#ef5350)}
 .sdata .ok{color:var(--ok)}.sdata .wa{color:var(--warn)}
 .legend{display:flex;align-items:center;gap:8px;font:400 11px var(--f-mono);color:var(--muted)}
 .legend .bar{width:120px;height:8px;border-radius:4px;background:linear-gradient(90deg,#2b6cd6,#2fbf9a,#e8c547,#ef5350)}
@@ -120,8 +121,6 @@ button:focus-visible{outline:2px solid var(--water);outline-offset:2px}
 @media (min-width:861px) and (min-height:501px), (min-width:861px) and (orientation:portrait){ #stage{position:absolute;inset:0} }
 @media (prefers-reduced-motion: reduce){ .live::before{animation:none} }
 </style>
-</head>
-<body>
 
 <div id="app">
   <div id="stage">
@@ -205,15 +204,22 @@ const ST=[
  {id:'R2',  name:'Rebombeo 2',         km:3.9,  z:474, suc:1.58, imp:9.00,  txt:'Solo 1,3 km después de R1 porque el tramo sube 68 m, una pendiente media del 5 %. La exigencia acá es de altura, no de fricción.'},
  {id:'R3',  name:'Rebombeo 3',         km:5.3,  z:509, suc:1.58, imp:11.00, txt:'Corona la barda a 509 m. Desde acá la traza sigue por la meseta hasta el km 8 y recién después baja: la presión debe sostener la línea sobre la meseta con margen de 0,7 kg/cm² o más.'},
  {id:'R4',  name:'Rebombeo 4',         km:10.9, z:443, suc:1.44, imp:10.00, txt:'Al pie de la bajada de la barda. El tramo anterior es el más largo (5,6 km) porque los 66 m de descenso compensan parte de la fricción.'},
- {id:'R5',  name:'Rebombeo 5',         km:14.7, z:418, suc:1.60, imp:12.00, txt:'Sin esta estación, R4 tendría que empujar 7,7 km hasta el tanque: aun a 12 kg/cm² llega sin presión residual y no supera el cuello de cisne (ver perfil, escenario sin R5).'},
+ {id:'R5',  name:'Rebombeo 5',         km:14.7, z:418, suc:1.60, imp:12.00, txt:'Sin esta estación, R4 tendría que empujar 7,7 km hasta el tanque. A 860 m³/h la presión llega a cero antes del tanque y la layflat se aplasta (vacío): el caudal de todo el sistema cae hasta lo que R4 puede llevar (ver perfil, escenario sin R5).'},
  {id:'DEST',name:'Tanque de destino',  km:18.6, z:409, suc:1.72, imp:null,  txt:'Tanque australiano pulmón. La manguera entra por el cuello de cisne y descarga por encima del borde con 1,70 kg/cm² de presión residual, unos 95 minutos después de salir del río.'},
 ];
-const STEN={"CAP": {"name": "Intake", "txt": "Draws from the river with a strainer and suction hose. Sets the flow for the whole system: 860 m³/h measured in operation, below the practical 12\" ceiling (1,050 m³/h)."}, "R1": {"name": "Booster 1", "txt": "Receives at 1.60 kg/cm² after 2.6 km and a 30 m climb. Friction in 12\" at 860 m³/h is 20.3 m per km (C ≈ 160, calibrated with field pressures)."}, "R2": {"name": "Booster 2", "txt": "Only 1.3 km after R1 because the section climbs 68 m, a 5 % average grade. Here the demand is elevation, not friction."}, "R3": {"name": "Booster 3", "txt": "Tops the escarpment at 509 m. The route stays on the plateau to km 8 before descending: pressure must keep the line above the plateau with at least 0.7 kg/cm² margin."}, "R4": {"name": "Booster 4", "txt": "At the foot of the escarpment descent. The previous section is the longest (5.6 km) because the 66 m drop offsets part of the friction."}, "R5": {"name": "Booster 5", "txt": "Without this station, R4 would have to push 7.7 km to the tank: even at 12 kg/cm² it arrives with no residual pressure and cannot clear the gooseneck (see profile, scenario without R5)."}, "DEST": {"name": "Destination tank", "txt": "Buffer tank. The hose enters over a gooseneck and discharges over the rim with 1.70 kg/cm² residual pressure, about 95 minutes after leaving the river."}};
+const STEN={"CAP": {"name": "Intake", "txt": "Draws from the river with a strainer and suction hose. Sets the flow for the whole system: 860 m³/h measured in operation, below the practical 12\" ceiling (1,050 m³/h)."}, "R1": {"name": "Booster 1", "txt": "Receives at 1.60 kg/cm² after 2.6 km and a 30 m climb. Friction in 12\" at 860 m³/h is 20.3 m per km (C ≈ 160, calibrated with field pressures)."}, "R2": {"name": "Booster 2", "txt": "Only 1.3 km after R1 because the section climbs 68 m, a 5 % average grade. Here the demand is elevation, not friction."}, "R3": {"name": "Booster 3", "txt": "Tops the escarpment at 509 m. The route stays on the plateau to km 8 before descending: pressure must keep the line above the plateau with at least 0.7 kg/cm² margin."}, "R4": {"name": "Booster 4", "txt": "At the foot of the escarpment descent. The previous section is the longest (5.6 km) because the 66 m drop offsets part of the friction."}, "R5": {"name": "Booster 5", "txt": "Without this station, R4 would have to push 7.7 km to the tank. At 860 m³/h the pressure reaches zero before the tank and the layflat flattens (vacuum): the flow of the whole system drops to what R4 can deliver (see profile, scenario without R5)."}, "DEST": {"name": "Destination tank", "txt": "Buffer tank. The hose enters over a gooseneck and discharges over the rim with 1.70 kg/cm² residual pressure, about 95 minutes after leaving the river."}};
 const SN=s=>LANG==='en'?STEN[s.id].name:s.name, STX=s=>LANG==='en'?STEN[s.id].txt:s.txt;
 const QD=860, DI=0.305, VEL=QD/3600/(Math.PI*DI*DI/4), JF=20.3, ETA=0.75, PNOM=14.0, POP=12.0, PCREST=0.7, PSUC=1.5, CEL=250;
 const PROF=[[0,376],[1.9,381],[2.6,406],[3.9,474],[5.3,509],[6.6,507],[8.0,502],[9.6,468],[10.9,443],[12.8,428],[14.7,418],[16.6,412],[18.6,409]];
 ST.forEach((s,i)=>{if(i>0)s.suc=s.id==='DEST'?1.70:1.60});ST.forEach((s,i)=>{if(s.imp==null)return;const n=ST[i+1];s.imp=Math.round((n.suc+(JF*(n.km-s.km)+(n.z-s.z))/10.2)*100)/100});
-ST.forEach(s=>{if(s.imp==null)return;const dH=(s.imp-s.suc)*10.2;s.kw=1000*9.81*QD/3600*dH/1000/ETA;s.rpm=Math.round(1850*Math.sqrt((s.imp-s.suc)/11.75)/10)*10;s.lph=s.kw*0.25});
+// Bomba de flota más usada: Pioneer PP128SS22 (impulsor 22") + Perkins 2806A 565 kW. Curva tentativa: BEP 900 m³/h · 124 m · η 0,75 a 1800 rpm
+const PUMP={n:'Pioneer PP128SS22',m:'Perkins 2806A',kw:565,n0:1800,nop:1800,H:[],E:[]};
+{const qb=900,hb=124;for(let i=0;i<=8;i++){const q=qb*1.5*i/8;PUMP.H.push([q,hb*(1.25-0.25*(q/qb)**2)]);if(q>0)PUMP.E.push([q,Math.max(0.2,0.75*(2*(q/qb)-(q/qb)**2))])}}
+const itp=(T,x)=>{if(x<=T[0][0])return T[0][1];for(let i=1;i<T.length;i++)if(x<=T[i][0]){const[a,b]=T[i-1],[c,d]=T[i];return b+(d-b)*(x-a)/(c-a)}const[a,b]=T[T.length-2],[c,d]=T[T.length-1];return d+(d-b)*(x-c)/(c-a)};
+const pH=(q,n)=>{const r=n/PUMP.n0;return itp(PUMP.H,q/r)*r*r},pE=(q,n)=>itp(PUMP.E,q*PUMP.n0/n);
+function pumpOp(q,dH){let lo=300,hi=PUMP.nop;if(pH(q,hi)<dH)return{ok:false,n:hi,eta:pE(q,hi),kw:PUMP.kw};for(let i=0;i<40;i++){const m=(lo+hi)/2;pH(q,m)>=dH?hi=m:lo=m}const eta=Math.max(.2,pE(q,hi));return{ok:true,n:hi,eta,kw:1000*9.81*q/3600*dH/1000/eta}}
+const pHmax=q=>pH(q,PUMP.nop);
+ST.forEach(s=>{if(s.imp==null)return;const su=s.id==='CAP'?0:s.suc;const o=pumpOp(QD,(s.imp-su)*10.2);s.op=o;s.kw=o.kw;s.rpm=Math.round(o.n/10)*10;s.eta=o.eta;s.load=o.kw/PUMP.kw;s.lph=s.kw*0.25});
 
 const KM=18.6, SX=20, YZ=0.12, ZB=370, SSC=1.3, GAP=3.45*SSC/SX, RIVX=-14;
 const fmt=(v,d=2)=>v.toFixed(d).replace('.',',');
@@ -244,6 +250,13 @@ const CREEK=17.25, ROADX=34, ROADK=0.07; // zanjón seco y ruta pavimentada
 const roadX=z=>ROADX+z*ROADK;
 const creekX=z=>CREEK*SX+9*Math.sin(z*0.045)+4*Math.sin(z*0.13);
 const routeZ=km=>26*Math.sin(km*0.42)+10*Math.sin(km*1.3+1);
+// camino de servicio (ripio) paralelo a la línea, para recorrerla en 4x4, con desvío a cada estación
+const SVC_OFF=12,svcN=km=>{const d=(routeZ(km+0.01)-routeZ(km-0.01))/0.02/SX;const L=Math.hypot(1,d);return{nx:-d/L,nz:1/L}};
+const svcPt=km=>{const n=svcN(km);return{x:km*SX+n.nx*SVC_OFF,z:routeZ(km)+n.nz*SVC_OFF}};
+const SVC=[];for(let k=0.12;k<=18.75;k+=0.02)SVC.push(svcPt(k));
+const SPUR_KM=[0,2.6,3.9,5.3,10.9,14.7,18.6];const SPUR=[];
+SPUR_KM.forEach(k=>{const n=svcN(k),x0=k*SX,z0=routeZ(k);for(let o=(k===18.6?11.5:6.2);o<=SVC_OFF;o+=0.5)SPUR.push({x:x0+n.nx*o,z:z0+n.nz*o})});
+const nearSvc=(x,z,r)=>{for(const p of SVC){if(Math.abs(p.x-x)<r&&Math.abs(p.z-z)<r&&Math.hypot(p.x-x,p.z-z)<r)return true}for(const p of SPUR){if(Math.hypot(p.x-x,p.z-z)<r)return true}return false};
 const RY=km=>(cota(km)-ZB)*YZ-0.45;   // nivel de la picada
 function segOf(km){let i=0;while(i<ST.length-2&&km>ST[i+1].km)i++;return i}
 function hglAt(km,st=ST){let i=0;while(i<st.length-2&&km>st[i+1].km)i++;const a=st[i],b=st[i+1];const H0=a.z+a.imp*10.2,H1=b.z+b.suc*10.2;return H0+(H1-H0)*(km-a.km)/(b.km-a.km)}
@@ -378,7 +391,7 @@ const dm=new THREE.Object3D();
 function scatter(geo,mat,n,sMin,sMax,yo,avoid,tint){
   const im=new THREE.InstancedMesh(geo,mat,n);im.castShadow=true;im.receiveShadow=false;let k=0,guard=0;
   while(k<n&&guard<n*20){guard++;const x=-40+rnd()*470,z=-150+rnd()*300;const km=Math.max(0,Math.min(KM,x/SX));
-    if(Math.abs(z-routeZ(km))<avoid)continue; if(Math.abs(x-RIVX)<7.5)continue; if(x/SX<2.3&&x>RIVX+7)continue; if(Math.abs(x-roadX(z))<4)continue;
+    if(Math.abs(z-routeZ(km))<avoid)continue; if(Math.abs(x-RIVX)<7.5)continue; if(x/SX<2.3&&x>RIVX+7)continue; if(Math.abs(x-roadX(z))<4)continue; if(nearSvc(x,z,3))continue;
     if(ST.some(s=>Math.hypot(x-s.km*SX,z-routeZ(s.km))<9))continue;
     const s=sMin+rnd()*(sMax-sMin);dm.position.set(x,terrH(x,z)+yo*s,z);dm.scale.set(s,s*(0.8+rnd()*0.5),s);dm.rotation.set(0,rnd()*6.28,0);dm.updateMatrix();im.setMatrixAt(k,dm.matrix);
     if(tint){const c=new THREE.Color(tint).offsetHSL((rnd()-.5)*0.04,(rnd()-.5)*0.15,(rnd()-.5)*0.12);im.setColorAt(k,c)}k++}
@@ -390,12 +403,12 @@ scatter(rockGeo(),new THREE.MeshStandardMaterial({roughness:.9,color:0x9a8b78,en
 
 // jarillas densas en el zanjón
 (function(){const im=new THREE.InstancedMesh(bushGeo(),new THREE.MeshStandardMaterial({roughness:.95,envMapIntensity:.4}),900);im.castShadow=true;let k=0;
-  for(let t=0;t<2000&&k<900;t++){const z=-130+rnd()*260,x=creekX(z)+(rnd()-.5)*10;if(Math.abs(z-routeZ(Math.min(KM,x/SX)))<4)continue;const s=0.8+rnd()*1.2;
+  for(let t=0;t<2000&&k<900;t++){const z=-130+rnd()*260,x=creekX(z)+(rnd()-.5)*10;if(Math.abs(z-routeZ(Math.min(KM,x/SX)))<4)continue;if(nearSvc(x,z,3))continue;const s=0.8+rnd()*1.2;
     dm.position.set(x,terrH(x,z)+0.15*s,z);dm.scale.set(s,s*(0.8+rnd()*0.4),s);dm.rotation.set(0,rnd()*6,0);dm.updateMatrix();im.setMatrixAt(k,dm.matrix);im.setColorAt(k,new THREE.Color(0x34401f).offsetHSL(0,0,(rnd()-.5)*0.1));k++}
   im.count=k;veg.add(im)})();
 // álamos en las cortinas de las chacras
 (function(){const g=new THREE.ConeGeometry(0.55,5.5,7);g.translate(0,2.75,0);const im=new THREE.InstancedMesh(g,new THREE.MeshStandardMaterial({color:0x3f5a28,roughness:.9,envMapIntensity:.4}),1600);im.castShadow=true;let k=0;
-  for(let x=RIVX+9;x<44&&k<1600;x+=11)for(let z=-130;z<130&&k<1600;z+=1.6){if(Math.abs(z-routeZ(Math.max(0,x/SX)))<5||Math.abs(x-roadX(z))<5)continue;if(hash(x,z)<0.15)continue;const s=0.8+hash(z,x)*0.5;
+  for(let x=RIVX+9;x<44&&k<1600;x+=11)for(let z=-130;z<130&&k<1600;z+=1.6){if(Math.abs(z-routeZ(Math.max(0,x/SX)))<5||Math.abs(x-roadX(z))<5)continue;if(nearSvc(x,z,3.2))continue;if(hash(x,z)<0.15)continue;const s=0.8+hash(z,x)*0.5;
     dm.position.set(x+ (hash(x*3,z)-.5)*0.4,terrH(x,z),z);dm.scale.set(s,s,s);dm.rotation.set(0,0,0);dm.updateMatrix();im.setMatrixAt(k++,dm.matrix)}
   im.count=k;veg.add(im)})();
 // ruta pavimentada
@@ -406,10 +419,54 @@ roadTex.wrapS=THREE.RepeatWrapping;
   if(n>0){const a=(n-1)*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}n++}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();
   const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({map:roadTex,roughness:.85,polygonOffset:true,polygonOffsetFactor:-1}));m.receiveShadow=true;scene.add(m)})();
+// ripio: cinta sobre el terreno con huellas
+const svcTex=labelTex(256,512,(x,w,h)=>{x.clearRect(0,0,w,h);
+  // tierra compactada con ripio, bordes que se funden con el terreno (como camino de yacimiento)
+  const g=x.createLinearGradient(0,0,w,0);g.addColorStop(0,'rgba(196,174,136,0)');g.addColorStop(0.1,'rgba(196,174,136,.75)');g.addColorStop(0.2,'rgba(205,184,146,1)');g.addColorStop(0.8,'rgba(205,184,146,1)');g.addColorStop(0.9,'rgba(196,174,136,.75)');g.addColorStop(1,'rgba(196,174,136,0)');
+  x.fillStyle=g;x.fillRect(0,0,w,h);
+  for(let i=0;i<5000;i++){const px=w*(0.12+0.76*Math.random()),py=Math.random()*h,r=Math.random();x.fillStyle=r<.4?'rgba(150,128,98,.35)':r<.75?'rgba(230,214,184,.4)':'rgba(120,104,84,.4)';const sz=1+Math.random()*2.2;x.fillRect(px,py,sz,sz)}
+  x.filter='blur(5px)';x.fillStyle='rgba(165,142,108,.35)';x.fillRect(w*0.27,0,w*0.1,h);x.fillRect(w*0.63,0,w*0.1,h);x.filter='none';
+  x.fillStyle='rgba(225,208,176,.25)';x.fillRect(w*0.46,0,w*0.08,h)});
+svcTex.wrapT=THREE.RepeatWrapping;
+const svcMat=new THREE.MeshStandardMaterial({map:svcTex,roughness:1,metalness:0,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});
+function ribbon(path,W){const pts=[],uv=[],idx=[];let acc=0;for(let i=0;i<path.length;i++){const p=path[i],q=path[Math.min(path.length-1,i+1)],o=path[Math.max(0,i-1)];let tx=q.x-o.x,tz=q.z-o.z;const L=Math.hypot(tx,tz)||1;tx/=L;tz/=L;if(i)acc+=Math.hypot(p.x-path[i-1].x,p.z-path[i-1].z);
+  for(const sg of[-1,1]){const px=p.x-tz*W*sg,pz=p.z+tx*W*sg;pts.push(px,terrH(px,pz)+0.07,pz);uv.push(sg<0?0:1,acc/6)}if(i){const a=(i-1)*2;idx.push(a,a+1,a+2,a+1,a+3,a+2)}}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();const m=new THREE.Mesh(g,svcMat);m.receiveShadow=true;scene.add(m);return m}
+{let seg=[];SVC.forEach(p=>{if(Math.abs(p.x-roadX(p.z))<3.3){if(seg.length>1)ribbon(seg,2.0);seg=[]}else seg.push(p)});if(seg.length>1)ribbon(seg,2.0)} // se corta en el cruce: la ruta asfaltada tiene prioridad
+SPUR_KM.forEach(k=>{const n=svcN(k),x0=k*SX,z0=routeZ(k);const pth=[];for(let o=SVC_OFF;o>=(k===18.6?11.2:5.6);o-=0.4)pth.push({x:x0+n.nx*o,z:z0+n.nz*o});ribbon(pth,1.0)});
+// camioneta 4x4 de recorrida
+let truck=null;function makeTruck(){const g=new THREE.Group();
+  const wM=M(0xeeeeec,{roughness:.3,metalness:.55}),gl=M(0x1b2530,{roughness:.1,metalness:.7}),bk=M(0x18191b,{roughness:.6}),ch=M(0x9aa0a6,{roughness:.3,metalness:.8});
+  const bx=(w,h,d,m,x,y,z)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);g.add(o);return o};
+  bx(5.3,0.62,1.86,wM,0,0.78,0);                      // carrocería baja
+  bx(1.25,0.30,1.82,wM,2.0,1.22,0);                   // capot
+  const cab=bx(2.25,0.72,1.74,wM,0.25,1.45,0);         // cabina doble
+  bx(1.95,0.52,1.78,gl,0.2,1.47,0);                     // vidrios laterales
+  const ws=bx(0.06,0.62,1.62,gl,1.40,1.42,0);ws.rotation.z=0.55; // parabrisas
+  const rw=bx(0.06,0.5,1.5,gl,-0.88,1.45,0);rw.rotation.z=-0.2;
+  bx(0.05,0.55,0.02,wM,0.25,1.47,0.9);bx(0.05,0.55,0.02,wM,0.25,1.47,-0.9);       // parante B
+  bx(1.95,0.5,0.06,wM,-1.7,1.31,0.9);bx(1.95,0.5,0.06,wM,-1.7,1.31,-0.9);bx(0.06,0.5,1.86,wM,-2.65,1.31,0); // caja
+  bx(0.08,0.36,1.6,bk,2.64,0.95,0);bx(0.09,0.06,1.0,ch,2.66,1.0,0);              // parrilla
+  [0.62,-0.62].forEach(z=>{bx(0.06,0.14,0.34,M(0xf4f6ff,{emissive:0xeef2ff,emissiveIntensity:.4}),2.64,1.08,z);bx(0.12,0.12,0.2,wM,1.25,1.55,z*1.62)}); // faros y espejos
+  bx(0.2,0.24,1.9,bk,2.62,0.55,0);bx(0.2,0.24,1.9,bk,-2.68,0.6,0);               // paragolpes
+  bx(4.6,0.08,0.12,bk,0,0.45,0.95);bx(4.6,0.08,0.12,bk,0,0.45,-0.95);            // estribos
+  const ant=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.6,4),bk);ant.position.set(1.0,2.05,0.6);g.add(ant);
+  const bea=bx(0.36,0.09,0.22,M(0xff9a1a,{emissive:0xff7a00,emissiveIntensity:.9}),0.3,1.86,0);
+  const tg=new THREE.CylinderGeometry(0.42,0.42,0.3,18);tg.rotateX(Math.PI/2);const rg=new THREE.CylinderGeometry(0.25,0.25,0.31,12);rg.rotateX(Math.PI/2);
+  [[1.65,0.82],[1.65,-0.82],[-1.6,0.82],[-1.6,-0.82]].forEach(([x,z])=>{const t=new THREE.Mesh(tg,M(0x141414,{roughness:.95}));t.position.set(x,0.42,z);g.add(t);const r=new THREE.Mesh(rg,ch);r.position.set(x,0.42,z);g.add(r);
+    const fe=bx(1.05,0.12,0.16,bk,x,0.86,z*1.06)});
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});g.scale.setScalar(0.72);scene.add(g);truck=g}
+let truckS=40,truckDir=1;const SVCL=[0];for(let i=1;i<SVC.length;i++)SVCL.push(SVCL[i-1]+Math.hypot(SVC[i].x-SVC[i-1].x,SVC[i].z-SVC[i-1].z));
+function moveTruck(dt){if(!truck)return;truckS+=truckDir*dt*6;const L=SVCL[SVCL.length-1];if(truckS>L-1){truckS=L-1;truckDir=-1}if(truckS<8){truckS=8;truckDir=1}
+  let i=1;while(i<SVCL.length-1&&SVCL[i]<truckS)i++;const a=SVC[i-1],b=SVC[i],t=(truckS-SVCL[i-1])/(SVCL[i]-SVCL[i-1]||1);const x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t;
+  const side=truckDir>0?-0.55:0.55,dx=b.x-a.x,dz=b.z-a.z,L2=Math.hypot(dx,dz)||1;const px=x-dz/L2*side,pz=z+dx/L2*side;
+  const ux=dx/L2*(truckDir>0?1:-1),uz=dz/L2*(truckDir>0?1:-1),hF=terrH(px+ux*1.6,pz+uz*1.6),hB=terrH(px-ux*1.6,pz-uz*1.6),hL=terrH(px-uz*0.6,pz+ux*0.6),hR=terrH(px+uz*0.6,pz-ux*0.6);
+  truck.position.set(px,(hF+hB)/2+0.04,pz);truck.rotation.set(0,0,0);truck.rotation.order='YZX';truck.rotation.y=Math.atan2(-uz,ux);truck.rotation.z=Math.atan2(hF-hB,3.2);truck.rotation.x=Math.atan2(hR-hL,1.2)}
 
 // ---------- estaciones ----------
 const stationGroups=[];
 const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6,metalness:.1,envMapIntensity:.3},o));
+setTimeout(()=>{makeTruck();moveTruck(0)},0);
 function add(m,g,x,y,z){m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;g.add(m);return m}
 function box(w,h,d,c,x,y,z,g,o){return add(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c,o)),g,x,y,z)}
 function cyl(r,h,c,x,y,z,g,rot,o,seg=20){const m=add(new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,seg),M(c,o)),g,x,y,z);if(rot==='x')m.rotation.z=Math.PI/2;if(rot==='z')m.rotation.x=Math.PI/2;return m}
@@ -579,7 +636,8 @@ function setHose(m){hoseMeshes.forEach(x=>x.material=m)}
 const labels=document.getElementById('labels');
 const lblEls=ST.map(s=>{const d=document.createElement('div');d.className='lbl';d.innerHTML=`${s.id}<small>km ${fmt(s.km)} · ${s.z} m</small>`;labels.appendChild(d);return d});
 const rLbl=document.createElement('div');rLbl.className='lbl river';rLbl.textContent='Río Neuquén';rLbl.dataset.es='Río Neuquén';rLbl.dataset.en2='Neuquén River';labels.appendChild(rLbl);
-const LM=[[20,-70,'Chacras del valle','Valley farms'],[roadX(-110)+3,-110,'Ruta pavimentada','Paved road'],[72,routeZ(3.6)+34,'Cañadón y bardas','Canyon and escarpments'],[140,-70,'Meseta','Plateau'],[195,routeZ(9.7)+30,'Bajada de la barda','Escarpment descent'],[290,-80,'Planicie · yacimiento','Plain · oil field'],[creekX(70),70,'Zanjón seco','Dry gully']].map(([x,z,t,te])=>{const e=document.createElement('div');e.className='lbl land';e.dataset.es=t;e.dataset.en2=te;e.textContent=t;labels.appendChild(e);return{e,p:new THREE.Vector3(x,terrH(x,z)+3,z)}});
+const truckLbl=(()=>{const e=document.createElement('div');e.className='lbl land';e.dataset.es='Camioneta 4x4 · recorrida';e.dataset.en2='4x4 pickup · line patrol';e.textContent=e.dataset.es;labels.appendChild(e);return e})();
+const LM=[[svcPt(7).x,svcPt(7).z+3,'Camino de servicio (ripio)','Service road (gravel)'],[20,-70,'Chacras del valle','Valley farms'],[roadX(-110)+3,-110,'Ruta pavimentada','Paved road'],[72,routeZ(3.6)+34,'Cañadón y bardas','Canyon and escarpments'],[140,-70,'Meseta','Plateau'],[195,routeZ(9.7)+30,'Bajada de la barda','Escarpment descent'],[290,-80,'Planicie · yacimiento','Plain · oil field'],[creekX(70),70,'Zanjón seco','Dry gully']].map(([x,z,t,te])=>{const e=document.createElement('div');e.className='lbl land';e.dataset.es=t;e.dataset.en2=te;e.textContent=t;labels.appendChild(e);return{e,p:new THREE.Vector3(x,terrH(x,z)+3,z)}});
 
 // ---------- vistas ----------
 const terrDim=new THREE.MeshStandardMaterial({color:0x26302d,roughness:1});
@@ -611,9 +669,20 @@ DEV.forEach(d=>{const p=P(d.km);const g=new THREE.Group();g.position.copy(p);sce
   g.traverse(o=>{if(o.isMesh)o.castShadow=true})});
 
 // ---------- perfil piezométrico ----------
-const ST5=ST.filter(s=>s.id!=='R5').map(s=>s.id==='R4'?Object.assign({},s,{imp:12.0}):Object.assign({},s));
-{const d=ST5.find(s=>s.id==='DEST');const r4=ST5.find(s=>s.id==='R4');d.suc=(r4.z+12*10.2-JF*(d.km-r4.km)-d.z)/10.2}
-function hglFric(km,st){let i=0;while(i<st.length-2&&km>st[i+1].km)i++;const a=st[i];return a.z+a.imp*10.2-JF*(km-a.km)}
+// Sin R5: R4 no puede sostener 860 m³/h hasta el tanque. El caudal de TODO el sistema baja hasta el valor que R4 (a 12 kg/cm² o el máximo de su bomba) puede llevar al tanque con 1,70 kg/cm².
+const JQ=q=>JF*Math.pow(q/QD,1.852);
+const ST5=ST.filter(s=>s.id!=='R5').map(s=>Object.assign({},s));
+const NR5={};
+{const r4=ST5.find(s=>s.id==='R4'),d=ST5.find(s=>s.id==='DEST');const L5=d.km-r4.km;
+ const capR4=q=>Math.min(POP,1.6+pHmax(q)/10.2);
+ // a 860: dónde se aplasta
+ const p860=k=>(r4.z+capR4(QD)*10.2-JF*(k-r4.km)-cota(k))/10.2;let k0=null;for(let k=r4.km;k<=d.km;k+=0.01){if(p860(k)<0){k0=k;break}}
+ let lo=200,hi=QD;for(let i=0;i<40;i++){const q=(lo+hi)/2;const need=1.70+(JQ(q)*L5+(d.z-r4.z))/10.2;need<=capR4(q)?lo=q:hi=q}
+ const q5=Math.floor(lo/5)*5;NR5.q=q5;NR5.k0=k0;NR5.p860=Math.min(...Array.from({length:200},(_,i)=>p860(r4.km+L5*i/199)));
+ ST5.forEach((s,i)=>{s.J=JQ(q5);if(i>0)s.suc=s.id==='DEST'?1.70:1.60});
+ ST5.forEach((s,i)=>{if(s.imp==null)return;const n=ST5[i+1];s.imp=n.suc+(s.J*(n.km-s.km)+(n.z-s.z))/10.2});}
+ST.forEach(s=>s.J=JF);
+function hglFric(km,st){let i=0;while(i<st.length-2&&km>st[i+1].km)i++;const a=st[i];return a.z+a.imp*10.2-(a.J||JF)*(km-a.km)}
 const profEl=document.getElementById('prof'),pc=document.getElementById('pc'),noR5=document.getElementById('noR5'),profBtn=document.getElementById('profBtn');
 function drawProf(){if(profEl.hidden)return;const dpr=Math.min(2,window.devicePixelRatio||1),W=pc.clientWidth,H=pc.clientHeight;pc.width=W*dpr;pc.height=H*dpr;const x=pc.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
   const PL=44,R=10,T=10,B=22,zmin=360,zmax=640;const X=k=>PL+(W-PL-R)*k/KM,Y=z=>T+(H-T-B)*(1-(z-zmin)/(zmax-zmin));
@@ -649,15 +718,20 @@ function drawProf(){if(profEl.hidden)return;const dpr=Math.min(2,window.devicePi
     c(L('Llegada al tanque','Tank arrival'),dest.suc<0?L('no llega (HGL bajo terreno)','does not arrive (HGL below ground)'):fmt(dest.suc,2)+' kg/cm²',dest.suc<0.5?'cr':dest.suc<1.4?'wa':'ok')+
     c(L('Impulsión máx.','Max discharge'),fmt(pmax,1)+' kg/cm² ('+Math.round(pmax/POP*100)+' % '+L('del límite 12','of 12 limit')+')',pmax>POP?'cr':pmax>=12?'wa':'ok')+
     c(L('Succión mín.','Min suction'),fmt(smin,2)+' kg/cm²',smin<1.4?'cr':smin<PSUC?'wa':'ok')+
-    c(L('Velocidad','Velocity'),fmt(VEL,2)+' m/s',VEL>=4?'cr':VEL>3.8?'wa':'ok')+
-    c(L('Fricción (C≈160)','Friction (C≈160)'),fmt(JF,1)+' m/km','ok')+
+    c(L('Velocidad','Velocity'),fmt(VEL*(noR5.checked?NR5.q/QD:1),2)+' m/s',VEL>=4?'cr':VEL>3.8?'wa':'ok')+
+    c(L('Fricción (C≈160)','Friction (C≈160)'),fmt(st[0].J||JF,1)+' m/km','ok')+
     c(L('Ariete instantáneo (a·v/g)','Instant water hammer (a·v/g)'),fmt(jk,1)+' kg/cm²','wa')+
     c(L('Cierre mín. tramo más largo','Min closure, longest section'),Math.round(tmax)+' s','ok')+
     c(L('Caída estática máx. por tramo','Max static drop per section'),Math.round(drop)+' m (≤ 100)',drop>100?'cr':'ok')+
-    c(L('Rebombeos','Boosters'),(st.length-2)+'',noR5.checked?'cr':'ok');
+    c(L('Rebombeos','Boosters'),(st.length-2)+'',noR5.checked?'cr':'ok')+
+    c(L('Caudal que llega','Delivered flow'),noR5.checked?NR5.q+' m³/h (−'+Math.round((1-NR5.q/QD)*100)+' %)':QD+' m³/h',noR5.checked?'cr':'ok')+
+    (noR5.checked?c(L('A 860 m³/h','At 860 m³/h'),L('la manguera se aplasta desde km ','hose flattens from km ')+fmt(NR5.k0??KM,1),'cr'):'')+
+    c(L('Bomba','Pump'),PUMP.n+' · '+PUMP.m+' '+PUMP.kw+' kW · '+L('tope','limit')+' '+PUMP.nop+' rpm','ok');
 }
 function toggleProf(on){profEl.hidden=!on;profBtn.setAttribute('aria-pressed',String(on));if(!MOB.matches)document.querySelector('.focus').style.visibility=on?'hidden':'';drawProf()}
 profBtn.onclick=()=>toggleProf(profEl.hidden);document.getElementById('profX').onclick=()=>toggleProf(false);noR5.onchange=drawProf;window.addEventListener('resize',drawProf);
+window.__wtRoad=i=>{const k=i<0?-i:ST[i].km,p=svcPt(k);const c=new THREE.Vector3(p.x,terrH(p.x,p.z),p.z);flyTo(c,c.clone().add(new THREE.Vector3(-18,20,26)),0.1)};
+window.__wtTruck=()=>{if(!truck)return;const c=truck.position.clone();flyTo(c,c.clone().add(new THREE.Vector3(5,3.2,6)),0.1)};
 window.__wtProf=v=>{toggleProf(true);noR5.checked=!!v;drawProf()};
 
 // ---------- cámara y navegación ----------
@@ -687,7 +761,7 @@ function stationData(i){
   if(s.id==='DEST'){const lvl=82+Math.sin(performance.now()/9000)*1.5;
     return cell(L('Nivel del tanque','Tank level'),fmt(lvl,1),'%')+cell(L('Volumen','Volume'),Math.round(3500*lvl/82).toLocaleString('es-AR'),'m³')+cell(L('Ingreso','Inflow'),Math.round(QD*j()),'m³/h')+cell(L('Presión de llegada','Arrival pressure'),fmt(s.suc*j()),'kg/cm²')+cell(L('Autonomía pulmón','Buffer autonomy'),'4,1','h')+cell(L('Cota','Elevation'),s.z,L('m s.n.m.','m a.s.l.'))+cell(L('Tránsito desde CAP','Transit from CAP'),(()=>{const t=Math.round(KM*1000/VEL/60);return Math.floor(t/60)+' h '+String(t%60).padStart(2,'0')})(),'min')+cell(L('Ingreso','Inlet'),L('Cuello de cisne','Gooseneck'),'')}
   const nx=ST[i+1];const dist=nx.km-s.km,dz=nx.z-s.z,dp=s.imp-nx.suc;const fuel=FUEL[i],aut=5000*fuel/100/s.lph;let pm=99;for(let k=s.km+0.05;k<nx.km-0.05;k+=0.02)pm=Math.min(pm,pressAt(k));
-  return cell(L('Bomba A','Pump A'),`${Math.round(s.rpm*j())} rpm`,'','ok')+cell(L('Bomba B','Pump B'),L('Backup','Standby'),'','wa')+cell(L('Succión','Suction'),fmt(s.suc*j()),'kg/cm²')+cell(L('Impulsión','Discharge'),fmt(s.imp*j()),'kg/cm²')+
+  return cell(L('Bomba A','Pump A'),`${Math.round(s.rpm*j())} rpm`,'','ok')+cell(L('Equipo','Unit'),'PP128SS22','Pioneer · 22"')+cell(L('Motor','Engine'),PUMP.m.replace('Perkins ',''),'Perkins · '+PUMP.kw+' kW')+cell(L('¿Alcanza la potencia?','Enough power?'),s.load<=0.85?L('Sí','Yes'):s.load<=1?L('Justo','Tight'):'No',Math.round(s.kw)+'/'+PUMP.kw+' kW · '+Math.round(s.load*100)+' %',s.load<=0.85?'ok':s.load<=1?'wa':'cr')+cell(L('Rendimiento bomba','Pump efficiency'),Math.round(s.eta*100),'%')+cell(L('Bomba B','Pump B'),L('Backup','Standby'),'','wa')+cell(L('Succión','Suction'),fmt(s.suc*j()),'kg/cm²')+cell(L('Impulsión','Discharge'),fmt(s.imp*j()),'kg/cm²')+
     cell(L('Caudal','Flow'),Math.round(QD*j()),'m³/h')+cell(L('Gasoil (5.000 L)','Diesel (5,000 L)'),fuel,'%')+cell(L('Autonomía','Autonomy'),fmt(aut,0),'h')+cell(L('Consumo','Consumption'),Math.round(s.lph*j()),'L/h')+cell(L('Potencia al eje','Shaft power'),Math.round(s.kw),'kW')+cell(L('P mín. en tramo','Min P in section'),fmt(pm,2),'kg/cm²',pm<PCREST?'wa':'ok')+cell(L('Cierre mín. válvula','Min valve closure'),Math.max(20,Math.round(4*dist*1000/CEL)),'s')+
     cell(L('Próximo tramo','Next section'),fmt(dist),'km')+cell(L('Desnivel','Elevation change'),(dz>0?'+':'')+dz,'m')+cell(L('Caída de presión','Pressure drop'),fmt(dp,1),'kg/cm²')+cell(L('Cota','Elevation'),s.z,L('m s.n.m.','m a.s.l.'))+cell(L('Telemetría','Telemetry'),L('Enlace OK','Link OK'),'','ok');
 }
@@ -754,13 +828,14 @@ const clock=new THREE.Clock();let acc=0;const v=new THREE.Vector3();
 const kq=document.getElementById('k-q'),kkw=document.getElementById('k-kw'),kg=document.getElementById('k-gas');
 function loop(){
   const dt=Math.min(0.05,clock.getDelta());const tt=clock.elapsedTime;
-  if(!reduce){beacons.forEach((b,i)=>b.visible=(Math.floor(tt*2+i)%2)===0);flowTex.offset.x-=dt*0.6;waterNorm.offset.y-=dt*0.05;fans.forEach(f=>f.rotation.x+=dt*24);fallFx.upd(dt,tt)}
+  if(!reduce){beacons.forEach((b,i)=>b.visible=(Math.floor(tt*2+i)%2)===0);flowTex.offset.x-=dt*0.6;waterNorm.offset.y-=dt*0.05;fans.forEach(f=>f.rotation.x+=dt*24);moveTruck(dt);fallFx.upd(dt,tt)}
   if(camAnim){camAnim.t+=dt/camAnim.dur;const k=Math.min(1,camAnim.t),e=k*k*(3-2*k);controls.target.lerpVectors(camAnim.fromT,camAnim.toT,e);camera.position.lerpVectors(camAnim.fromE,camAnim.toE,e);if(k>=1)camAnim=null}
   controls.update();
   {const T=controls.target,dist=camera.position.distanceTo(T),half=Math.max(25,Math.min(260,dist*0.9));sun.target.position.copy(T);sun.position.copy(sunDir).multiplyScalar(300).add(T);const sc=sun.shadow.camera;if(Math.abs(sc.right-half)>1){sc.left=-half;sc.right=half;sc.top=half;sc.bottom=-half;sc.updateProjectionMatrix()}}
   renderer.render(scene,camera);
   const W=canvas.clientWidth,H=canvas.clientHeight;
   ST.forEach((s,i)=>{v.copy(stationGroups[i].localToWorld(v3(s.id==='DEST'?6:0,s.id==='DEST'?3.6:2.7,0)));v.project(camera);const el=lblEls[i];if(v.z>1||Math.abs(v.x)>1.2){el.hidden=true;return}el.hidden=false;el.style.left=((v.x+1)/2*W)+'px';el.style.top=((1-v.y)/2*H)+'px'});
+  if(truck){v.copy(truck.position);v.y+=2.4;v.project(camera);truckLbl.hidden=v.z>1||Math.abs(v.x)>1.05||Math.abs(v.y)>1.05;truckLbl.style.left=((v.x+1)/2*W)+'px';truckLbl.style.top=((1-v.y)/2*H)+'px'}
   LM.forEach(l=>{v.copy(l.p).project(camera);const far=camera.position.distanceTo(controls.target)>140;l.e.hidden=!far||v.z>1||Math.abs(v.x)>1.1||Math.abs(v.y)>1.1;l.e.style.left=((v.x+1)/2*W)+'px';l.e.style.top=((1-v.y)/2*H)+'px'});
   v.copy(riverLbl).project(camera);rLbl.hidden=v.z>1||Math.abs(v.x)>1.2;rLbl.style.left=((v.x+1)/2*W)+'px';rLbl.style.top=((1-v.y)/2*H)+'px';
   acc+=dt;if(acc>1){acc=0;const j=()=>1+(Math.random()-.5)*0.006;kq.textContent=Math.round(QD*j());kkw.textContent=Math.round(KWT*j()).toLocaleString('es-AR');kg.textContent=Math.round(LPHT*j());
@@ -772,5 +847,4 @@ window.__wtCam=(t,e)=>{camAnim=null;controls.target.set(...t);camera.position.se
 })();
 </script>
 
-</body>
 </html>
